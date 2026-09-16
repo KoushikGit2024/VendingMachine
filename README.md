@@ -7,6 +7,29 @@
 
 ---
 
+## Quick Start (Run Simulation Immediately)
+
+If you have **Icarus Verilog** installed and want to run the simulation right now in Windows PowerShell:
+
+```powershell
+# 1. Compile the core testbench and RTL source files
+iverilog -g2001 -o sim/vending_machine_tb.vvp tb/vending_machine_tb.v rtl/*.v
+
+# 2. Execute the compiled simulation
+vvp sim/vending_machine_tb.vvp
+
+# 3. View interactive waveforms (optional)
+gtkwave sim/vending_machine_tb.vcd
+```
+
+### Tool Roles at a Glance
+- **`iverilog`** $\rightarrow$ Compiles Verilog-2001 HDL code into a simulation binary executable (`.vvp`).
+- **`vvp`** $\rightarrow$ Runs the compiled simulation binary and prints self-checking verification results.
+- **`waveform.vcd`** $\rightarrow$ Value Change Dump file storing every signal state transition over time.
+- **`GTKWave`** $\rightarrow$ Graphical waveform viewer that visually displays digital signal transitions.
+
+---
+
 ## Overview
 
 This repository contains the complete design, synthesizable **Verilog-2001 (IEEE 1364-2001)** RTL implementation, self-checking simulation verification suite, and Vivado FPGA build for a **Digital Vending Machine (DVM) Controller** targeting the **Digilent Basys 3** evaluation board (`xc7a35tcpg236-1`).
@@ -67,6 +90,135 @@ The design uses a fully decoupled architecture where product catalog pricing, in
     ├── timing_summary_report.txt    # Genuine Vivado timing report (+2.852ns WNS)
     └── utilization_report.txt       # Genuine Vivado resource utilization report
 ```
+
+---
+
+## How to Run Simulation (Beginner's Guide)
+
+Follow this step-by-step guide to run the simulation environment using **Windows PowerShell**, **Icarus Verilog**, and **GTKWave**.
+
+### Step 1: Open Project Root in PowerShell
+Open Windows PowerShell and navigate to the project directory:
+
+```powershell
+cd path/to/VendingMachine
+```
+
+### Step 2: Verify Tool Installation
+Confirm that Icarus Verilog (`iverilog`, `vvp`) and GTKWave are available on your system:
+
+```powershell
+iverilog -v
+vvp -v
+gtkwave --version
+```
+*(If any command returns an error, see the [Troubleshooting](#troubleshooting) section below.)*
+
+### Step 3: Compile RTL Source Files + Testbench
+Compile the Verilog-2001 source files and testbench into an executable simulation output:
+
+```powershell
+# Compile Core Verification Suite (Core FSM, Coins, Payment, Online, Random 1000, Stress 1000)
+iverilog -g2001 -o sim/vending_machine_tb.vvp tb/vending_machine_tb.v rtl/*.v
+
+# Compile Extension Verification Suite (Inventory, Statistics Counters, Admin Mode, Display Menu)
+iverilog -g2001 -o sim/inventory_statistics_tb.vvp tb/inventory_statistics_tb.v rtl/*.v
+```
+
+### Step 4: Run the Simulation Executable
+Execute the compiled simulation binary with `vvp`:
+
+```powershell
+# Run Core Verification Simulation
+vvp sim/vending_machine_tb.vvp
+
+# Run Extension Verification Simulation
+vvp sim/inventory_statistics_tb.vvp
+```
+
+### Step 5: Expected Terminal Verification Output
+When `vvp sim/vending_machine_tb.vvp` runs, you will see real-time timestamped event logs followed by a comprehensive summary report:
+
+```text
+=======================================================================
+     DIGITAL VENDING MACHINE CORE - ENHANCED VERIFICATION SUITE       
+=======================================================================
+
+-----------------------------------------------------------------------
+ 1. DIRECTED DETERMINISTIC REGRESSION SUITE (20 TESTS)
+-----------------------------------------------------------------------
+[0 ns] RESET CHECK -> FSM=IDLE Balance=0 Ready=1 OutputsSafe=1 PASS
+[PASS] Directed Test 1: TEST-001: Power-on reset puts system in ST_IDLE with ready=1, balance=0
+[225 ns] SELECT -> PRODUCT=1 PRICE=15
+[235 ns] FSM: ST_IDLE -> ST_SELECT
+[245 ns] FSM: ST_SELECT -> ST_PAYMENT
+[PASS] Directed Test 2: TEST-002: Valid product selection advances to ST_PAYMENT
+...
+============================================================
+DIGITAL VENDING MACHINE - VERIFICATION SUMMARY
+============================================================
+DIRECTED TESTS       : 20 / 20 PASSED
+RANDOM TESTS         : 1000 / 1000 PASSED (Seed: 12345)
+STRESS TESTS         : 1000 / 1000 PASSED
+INVARIANT CHECKS     : 112660 / 112660 PASSED
+FUNCTIONAL COVERAGE  : 100%
+TOTAL FAILURES       : 0
+OVERALL DIGITAL VERIFICATION STATUS: >>> PASS <<<
+============================================================
+```
+
+### Step 6: Waveform File Generation
+During execution, the testbenches automatically record every digital signal transition over time into Value Change Dump (`.vcd`) files located in the `sim/` folder:
+- **`sim/vending_machine_tb.vcd`**: Core FSM, coin insertion, balance accumulation, change calculation, refund strobes, online payment handshake, and random stress waveforms.
+- **`sim/inventory_statistics_tb.vcd`**: Product stock levels, low-stock/out-of-stock flags, revenue counters, Admin mode menus, and 7-segment display digits.
+
+### Step 7 & 8: View Waveforms in GTKWave
+To open the generated waveform file visually in GTKWave, execute:
+
+```powershell
+gtkwave sim/vending_machine_tb.vcd
+```
+
+In the GTKWave GUI:
+1. Expand `vending_machine_tb` in the top-left **SST** panel.
+2. Select `dut` (or top-level signals).
+3. Highlight signals like `clk`, `rst`, `fsm_state_debug`, `inserted_amount`, `dispense_valid`, `change_valid` and click **Append** to display color-coded waveform transitions over time.
+
+---
+
+## Troubleshooting
+
+### 1. `'iverilog' is not recognized as an internal or external command`
+- **Cause**: Icarus Verilog is not installed or its `bin` directory is not included in your Windows System `PATH` environment variable.
+- **Fix**:
+  1. Download and install Icarus Verilog for Windows (e.g., from `bleyer.org/icarus`).
+  2. Check the installation directory (typically `C:\iverilog\bin` or `C:\Program Files\iverilog\bin`).
+  3. Add the `bin` path to your Windows Environment Variables under System `PATH`.
+  4. Restart PowerShell and test with `iverilog -v`.
+
+### 2. `'vvp' is not recognized as an internal or external command`
+- **Cause**: `vvp.exe` is part of Icarus Verilog and resides in the same `bin` folder as `iverilog`.
+- **Fix**: Follow the same PATH fix above to ensure `C:\iverilog\bin` is in your environment PATH.
+
+### 3. `'gtkwave' is not recognized as an internal or external command`
+- **Cause**: GTKWave is not installed or its executable path is missing from system `PATH`.
+- **Fix**:
+  1. GTKWave is typically bundled with the Icarus Verilog Windows installer (located in `C:\iverilog\gtkwave\bin`).
+  2. Add `C:\iverilog\gtkwave\bin` to your System `PATH` variable and restart PowerShell.
+
+### 4. `VCD file not generated` or `Unable to open sim/vending_machine_tb.vcd`
+- **Cause**: The `sim/` output folder does not exist prior to compilation, or the simulation encountered a fatal syntax error before calling `$dumpfile`.
+- **Fix**: Ensure the `sim/` directory exists in the project root:
+  ```powershell
+  mkdir -Force sim
+  ```
+
+### 5. Compilation Errors or Syntax Warnings
+- **Cause**: Omission of the `-g2001` IEEE compatibility flag or missing module dependencies.
+- **Fix**: Always include `-g2001` and include all RTL files (`rtl/*.v`):
+  ```powershell
+  iverilog -g2001 -o sim/vending_machine_tb.vvp tb/vending_machine_tb.v rtl/*.v
+  ```
 
 ---
 
@@ -219,33 +371,15 @@ The design was synthesized and implemented targeting the **Xilinx Artix-7 XC7A35
 
 ---
 
-## How to Run Simulation & Build
+## Vivado Build & GUI Guide
 
-### 1. Run Simulation with Icarus Verilog
-
-```bash
-# Core Verification Suite (Directed, Random 1000, Stress 1000, Scoreboard & Invariants)
-iverilog -g2001 -o sim/vending_machine_tb.vvp tb/vending_machine_tb.v rtl/*.v
-vvp sim/vending_machine_tb.vvp
-
-# Phase 4 Feature Extension Suite (Inventory, Statistics, Admin, Display Menu)
-iverilog -g2001 -o sim/inventory_statistics_tb.vvp tb/inventory_statistics_tb.v rtl/*.v
-vvp sim/inventory_statistics_tb.vvp
-```
-
-### 2. View Waveforms in GTKWave
-
-```bash
-gtkwave sim/vending_machine_tb.vcd
-```
-
-### 3. Run Vivado Build (Batch Mode)
+### 1. Run Vivado Build (Batch Mode)
 
 ```cmd
 vivado -mode batch -source scripts/build_project.tcl
 ```
 
-### 4. Open Project in Vivado GUI
+### 2. Open Project in Vivado GUI
 
 1. Launch **Xilinx Vivado**.
 2. Click **Open Project**.
