@@ -1,0 +1,49 @@
+# Vivado generated files and directories
+*.jou
+*.log
+*.str
+*.pb
+*.dcp
+*.wdb
+*.vcd
+*.vvp
+*.fsdb
+.Xil/
+hd_visual/
+vivado.log
+vivado.jou
+vivado_*.backup.log
+vivado_*.backup.jou
+*.cache/
+*.hw/
+*.ip_user_files/
+*.runs/
+*.sim/
+*.gen/
+
+# Simulator outputs (ModelSim, Questa, Vivado XSIM, Icarus Verilog)
+*.wlf
+*.vstf
+work/
+xsim.dir/
+webtalk*.log
+webtalk*.jou
+xsc.log
+xvlog.log
+xvlog.pb
+xelab.log
+xelab.pb
+xsim.log
+xsim.jou
+
+# OS / Editor artifacts
+.DS_Store
+Thumbs.db
+*.swp
+*.bak
+*~
+.vscode/
+.idea/
+
+# Internal documentation directory (keep local, omit from Git)
+docs/
