@@ -21,7 +21,7 @@ The design uses a fully decoupled architecture where product catalog pricing, in
 - **Decoupled FSM Architecture**: Products are treated strictly as **DATA**. The FSM contains 10 operational states (`ST_IDLE`, `ST_SELECT`, `ST_PAYMENT`, `ST_EVALUATE`, `ST_ONLINE_WAIT`, `ST_DISPENSE`, `ST_CHANGE`, `ST_REFUND`, `ST_COMPLETE`, `ST_ERROR`) and zero product-specific states.
 - **Multi-Denomination Coin Support**: Accepts and validates ₹1, ₹2, ₹5, ₹10, and ₹20 coin codes; rejects unsupported or unsolicited coins without corrupting transaction state.
 - **Exact & Overpayment Handling**: Computes exact single-cycle change strobes on overpayment; supports full refund on customer cancellation.
-- **Abstract Online Payment Handshake**: Handshakes with external payment gateways for net remaining balance deltas ($\text{prod\_price} - \text{accum\_balance}$) with an integrated 5-second watchdog timer for automatic timeout recovery.
+- **Abstract Online Payment Handshake**: Handshakes with external payment gateways for net remaining balance deltas (`prod_price - accum_balance`) with an integrated 5-second watchdog timer for automatic timeout recovery.
 - **Inventory & Stock Management**: Tracks 4 product slots (10 initial stock each) with underflow protection, low-stock warnings (`<= 2` units), and out-of-stock lockouts (`0` units).
 - **Admin & Maintenance Mode**: Isolated control domain entered via switch `SW15` in idle state; navigates BCD statistics menus (vends, revenue, errors, stock) and triggers restocking via `SW13`.
 - **7-Segment Display & LED Mapping**: Drives 4-digit multiplexed 7-segment display and 16 status LEDs on the Basys 3 board.
@@ -181,7 +181,7 @@ OVERALL DIGITAL VERIFICATION STATUS:
 - **INV-002**: Balance never underflows or becomes negative.
 - **INV-003**: Dispense occurs only for valid, in-stock products after complete payment.
 - **INV-004**: Refund occurs only on explicit cancellation or error paths.
-- **INV-005**: Change occurs only on overpayment transactions ($\text{change} = \text{cash} - \text{price}$).
+- **INV-005**: Change occurs only on overpayment transactions (`change = cash - price`).
 - **INV-006**: Invalid coin codes never increase credited transaction balance.
 - **INV-007**: Inventory stock never underflows below 0.
 - **INV-008**: Successful dispensing decrements product inventory exactly once per transaction.
